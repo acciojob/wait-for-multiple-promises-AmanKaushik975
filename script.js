@@ -1,45 +1,32 @@
-//your JS code here. If required.
-function createPromise() {
-  const randomTime = Math.floor(Math.random() * 3) + 1;
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(randomTime);
-    }, randomTime * 1000);
-  });
+// Function to create a promise that resolves after a random time between min and max seconds
+function createPromise(min, max) {
+    const randomTime = Math.floor(Math.random() * (max - min + 1) + min) * 1000;
+    return new Promise(resolve => {
+        setTimeout(() => resolve(randomTime / 1000), randomTime);
+    });
 }
 
-const promises = [createPromise(), createPromise(), createPromise()];
+// Create an array of 3 promises
+const promises = [
+    createPromise(1, 3),
+    createPromise(1, 3),
+    createPromise(1, 3)
+];
 
-const table = document.getElementById("table");
+// Display loading text in the table
+document.getElementById('results').innerHTML = `<tr><td colspan="2">Loading...</td></tr>`;
 
-const loadingRow = document.createElement("tr");
-const loadingCell = document.createElement("td");
-loadingCell.setAttribute("colspan", "2");
-loadingCell.textContent = "Loading...";
-loadingRow.appendChild(loadingCell);
-table.appendChild(loadingRow);
+// Use Promise.all to wait for all promises to resolve
+Promise.all(promises)
+    .then(times => {
+        // Calculate total time taken
+        const totalTime = times.reduce((acc, curr) => acc + curr, 0);
 
-Promise.all(promises).then((results) => {
-  table.removeChild(loadingRow);
-
-  results.forEach((result, index) => {
-    const row = document.createElement("tr");
-    const promiseCell = document.createElement("td");
-    const timeCell = document.createElement("td");
-    promiseCell.textContent = `Promise ${index + 1}`;
-    timeCell.textContent = `${result}`;
-    row.appendChild(promiseCell);
-    row.appendChild(timeCell);
-    table.appendChild(row);
-  });
-
-  const totalRow = document.createElement("tr");
-  const totalCell = document.createElement("td");
-  const totalTimeCell = document.createElement("td");
-  const totalTime = results.reduce((acc, curr) => acc + curr, 0);
-  totalCell.textContent = "Total";
-  totalTimeCell.textContent = `${totalTime.toFixed(3)}`;
-  totalRow.appendChild(totalCell);
-  totalRow.appendChild(totalTimeCell);
-  table.appendChild(totalRow);
-});
+        // Populate the table with the results
+        document.getElementById('results').innerHTML = `
+            <tr><td>Promise 1</td><td>${times[0]}</td></tr>
+            <tr><td>Promise 2</td><td>${times[1]}</td></tr>
+            <tr><td>Promise 3</td><td>${times[2]}</td></tr>
+            <tr><td>Total</td><td>${totalTime.toFixed(3)}</td></tr>
+        `;
+    });
